@@ -21,6 +21,12 @@ public class Game {
         whitePoints = 0f;
         blackPoints = 0f;
         gamelogic = new Gamelogic(cb, moves);
+        List<String> copy = new ArrayList<>(moves);
+        if (!copy.isEmpty()){
+            for (String move : copy){
+                gamelogic.movePiece(move);
+            }
+        }
     }
     public Game(){
         this(new ChessBoard(), new ArrayList<>());

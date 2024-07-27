@@ -1,7 +1,6 @@
 package board;
 
 import edu.princeton.cs.algs4.StdDraw;
-
 import java.awt.*;
 
 /** This class draws the chess board from ChessBoard */

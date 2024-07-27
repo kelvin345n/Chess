@@ -28,14 +28,6 @@ public class Gamelogic {
         cb.updatePieceSets();
         // Add current position
         addPosition(getPositionString());
-        if (!moves.isEmpty()){
-            Gamelogic g = new Gamelogic();
-            for (String move : moves){
-                g.movePiece(move);
-            }
-            // Positions hashmap is set to the new one with all the prev moves.
-            positions = g.getPositionsMap();
-        }
     }
 
     public Gamelogic(){
@@ -113,6 +105,37 @@ public class Gamelogic {
         }
         return privilege;
     }
+    /** Returns true if the color given can castle queen side */
+    public boolean queenCastle(boolean forWhite){
+        int row = 7;
+        if (forWhite){
+            row = 0;
+        }
+        Piece king = cb.getPieceAt(cb.convertToIndex(4, row));
+        // Checking queen side castling
+        Piece queenRook = cb.getPieceAt(cb.convertToIndex(0, row));
+        if (Piece.isKing(king) && !king.isMoved()){
+            return Piece.isRook(queenRook) && !queenRook.isMoved();
+        }
+        return false;
+    }
+    /** Returns true if the color given can castle king side */
+    public boolean kingCastle(boolean forWhite){
+        int row = 7;
+        if (forWhite){
+            row = 0;
+        }
+        Piece king = cb.getPieceAt(cb.convertToIndex(4, row));
+        // Checking king side castling
+        Piece kingRook = cb.getPieceAt(cb.convertToIndex(7, row));
+        if (Piece.isKing(king) && !king.isMoved()){
+            return Piece.isRook(kingRook) && !kingRook.isMoved();
+        }
+        return false;
+    }
+
+
+
 
     /** Parses the input to see if it is valid formatting, and then
      * determines if this is a valid move. If not, then return false. If
