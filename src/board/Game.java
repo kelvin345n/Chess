@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+
 /** This class runs the game and determines the winner. Such as checkmate, or
  * draw due to insufficient material. */
 public class Game {
