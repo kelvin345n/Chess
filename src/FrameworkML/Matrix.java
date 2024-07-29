@@ -33,13 +33,8 @@ public class Matrix {
     public Matrix(int rows, int cols){
         this.cols = cols;
         this.rows = rows;
+        // Sets the array to 0.f be default.
         this.m = new float[cols*rows];
-
-        for (int r = 1; r <= rows; r++){
-            for (int c = 1; c <= cols; c++){
-                setElement(r, c, 0f);
-            }
-        }
     }
 
     public int getRows(){
@@ -53,14 +48,14 @@ public class Matrix {
     }
 
     /** Returns a random float from 0 - N */
-    public float getRandFloat(int low, int high){
+    public float getRandFloat(float low, float high){
         Random r = new Random();
         return r.nextFloat(low, high);
     }
 
     /** Randomizes all elements in the matrix based on a
      * seed value */
-    public void randomizeMatrix(int low, int high) {
+    public void randomizeMatrix(float low, float high) {
         for (int r = 1; r <= rows; r++) {
             for (int c = 1; c <= cols; c++) {
                 setElement(r, c, getRandFloat(low, high));

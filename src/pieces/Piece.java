@@ -24,6 +24,10 @@ public interface Piece {
     /** Sets that the piece moved to true. */
     void setMoved();
 
+    /** Sets the move status of the piece to the given boolean value. */
+    void setMoved(boolean b);
+
+
     /** Returns the string representation of that piece. Useful for StdDraw */
     String getImageRep();
 

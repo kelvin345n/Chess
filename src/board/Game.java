@@ -17,13 +17,15 @@ public class Game {
     float whitePoints;
     float blackPoints;
 
+    float orgWhite;
+    float orgBlakc;
+
     public Game(ChessBoard cb, List<String> moves){
         whitePoints = 0f;
         blackPoints = 0f;
-        gamelogic = new Gamelogic(cb, moves);
-        List<String> copy = new ArrayList<>(moves);
-        if (!copy.isEmpty()){
-            for (String move : copy){
+        gamelogic = new Gamelogic(cb);
+        if (!moves.isEmpty()){
+            for (String move : moves){
                 gamelogic.movePiece(move);
             }
         }
@@ -61,12 +63,8 @@ public class Game {
     /** Checks if the game is over in its current state. */
     public boolean isGameOver(){
         boolean whiteTurn = gamelogic.isWhiteTurn();
-        String color = "Black";
-        String otherColor = "White";
-        if (whiteTurn) {
-            color = "White";
-            otherColor = "Black";
-        }
+        String color = whiteTurn ? "White" : "Black";
+        String otherColor = whiteTurn ? "Black" : "White";
 
         // Insufficient material
         ChessBoard b = gamelogic.getChessBoard();
@@ -110,6 +108,73 @@ public class Game {
         }
         return false;
     }
+
+
+    /** Use this to check if the game is over when a temporaray move is made */
+    public boolean tempGameOver(){
+        boolean whiteTurn = gamelogic.isWhiteTurn();
+        // Insufficient material
+        ChessBoard b = gamelogic.getChessBoard();
+        if (b.getPieceScore(true) < 4 && b.getPieceScore(false) < 4){
+            if (b.getPieceScore(true) == 2 && b.getPieceScore(false) > 0){
+                // White has two knights vs king and anything else means no draw.
+            } else if (b.getPieceScore(false) == 2 && b.getPieceScore(true) > 0) {
+
+            } else {
+                setPoints(whiteTurn, 0.5f);
+                setPoints(!whiteTurn, 0.5f);
+                return true;
+            }
+        }
+
+        // 3-fold repetition
+        String currPosition = gamelogic.getPositionString();
+        int counter = gamelogic.getPositionsMap().get(currPosition);
+        if (counter == 3){
+            setPoints(whiteTurn, 0.5f);
+            setPoints(!whiteTurn, 0.5f);
+            return true;
+        }
+
+        // The color up to move has no moves to make.
+        if (gamelogic.allPossibleMoves(whiteTurn).isEmpty()){
+            if (gamelogic.getChessBoard().isKingChecked(whiteTurn)){
+                // Checkmate
+                setPoints(whiteTurn, 0f);
+                setPoints(!whiteTurn, 1f);
+            } else {
+                // Stalemate
+                setPoints(whiteTurn, 0.5f);
+                setPoints(!whiteTurn, 0.5f);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /** Given a move, the game temporarily changed the chessboard, moveslist,
+     * and game state. The game does not change back unless 'reverseMove' is called.
+     * If it is called twice in a row, then undefined behaviors happen. Must be a valid move.
+     * if not bad things happen. */
+    public void tempMove(String move){
+        gamelogic.tempMove(move);
+    }
+
+    /** The move called from temp move is reversed, and the original game state before
+     * it was called is fully restored. If tempMove was not called before then this will
+     * cause undefined behavior.
+     *
+     * This includes move list,
+     * The chessboard,
+     *
+     * */
+    public void reverseMove(){
+        gamelogic.reverseMove();
+        whitePoints = orgWhite;
+        blackPoints = orgBlakc;
+    }
+
+
 
     public Gamelogic getGamelogic(){
         return gamelogic;

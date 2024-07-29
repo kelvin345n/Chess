@@ -153,7 +153,7 @@ public class Conv3D implements Layer{
             // Each of the weights will correspond to a matrix that is
             // the filter size x number of filters needed.
             weights[i] = new Matrix(rowFilterSize, colFilterSize * filterCount);
-            weights[i].randomizeMatrix(0, 1);
+            weights[i].randomizeMatrix(-0.5f, 0.5f);
             weightGrad[i] = new Matrix(rowFilterSize, colFilterSize * filterCount);
             runningWeightGrad[i] = new Matrix(rowFilterSize, colFilterSize * filterCount);
         }
@@ -161,7 +161,7 @@ public class Conv3D implements Layer{
             // Each neuron will be its filter size and all the weights matrices at the same
             // filter position and size.
             biases[i] = new Matrix(numOfRowFilters, numOfColFilters);
-            biases[i].randomizeMatrix(0, 1);
+            biases[i].randomizeMatrix(-0.5f, 0.5f);
             biasGrad[i] = new Matrix(numOfRowFilters, numOfColFilters);
             runningBiasGrad[i] = new Matrix(numOfRowFilters, numOfColFilters);
             // Each element in these initially set to zero.

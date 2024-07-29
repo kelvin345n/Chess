@@ -20,18 +20,96 @@ public class Gamelogic {
     // Must also include all possible moves and castling privileges.
     private HashMap<String, Integer> positions;
 
-    public Gamelogic(ChessBoard cb, List<String> moves){
+    // All these are for the temp move.
+    private String startTile;
+    private String endTile;
+    private Piece startPiece;
+    private Piece endPiece;
+
+    private String enPassTile;
+    private Piece enPassPiece;
+    private String tempPosition;
+
+    private String rookCastleEnd;
+    private String rookCastleStart;
+    private Piece rookCastle;
+
+
+    // Tracks what the start piece isMoved attribute was set to.
+    private boolean startPieceMove;
+
+    public Gamelogic(ChessBoard cb){
         this.cb = cb;
         whiteTurn = true;
-        movesList = moves;
+        movesList = new ArrayList<>();
         positions = new HashMap<>();
         cb.updatePieceSets();
         // Add current position
         addPosition(getPositionString());
     }
-
     public Gamelogic(){
-        this(new ChessBoard(), new ArrayList<>());
+        this(new ChessBoard());
+    }
+
+    /** Given a VALID move. must be valid or undefined things happen. Does the move.
+     * Changes everything that a normal move would. */
+    public void tempMove(String move){
+        move = move.strip().toLowerCase();
+        // Grabs the starting position
+        String start = move.substring(0, 2);
+        // Grabs the ending position
+        String end = move.substring(6, 8);
+        String promotion = "";
+        if (move.length() == 10){
+            promotion = move.substring(9);
+        }
+        enPassTile = cb.getEnPassant();
+        enPassPiece = null;
+        if (!enPassTile.isEmpty()){
+            enPassPiece = cb.getPieceAt(enPassTile);
+        }
+        startTile = start;
+        endTile = end;
+        startPiece = cb.getPieceAt(start);
+        endPiece = cb.getPieceAt(end);
+        startPieceMove = startPiece.isMoved();
+
+        // Should get changed if there was castling involved.
+        rookCastleStart = null;
+
+        boolean temp = true;
+        doMove(start, end, promotion, temp);
+        startPiece.setMoved();
+        whiteTurn = !whiteTurn;
+        cb.attackOnTiles();
+        cb.updatePieceSets();
+        tempPosition = getPositionString();
+        // The move was made, so we add that new position to the hashmap.
+        addPosition(tempPosition);
+    }
+    /** When temp move is called then reverse move reverses positions, moveslist,
+     * turn, and chessboard. Also if piece has not moved, set to back to unmoved.
+     * Also sets enpass string back to normal. */
+    public void reverseMove(){
+        startPiece.setMoved(startPieceMove);
+        cb.setPieceAt(startPiece, startTile);
+        cb.setPieceAt(endPiece, endTile);
+
+        cb.setEnPassant(enPassTile);
+        if (!enPassTile.isEmpty()){
+            cb.setPieceAt(enPassPiece, enPassTile);
+        }
+
+        if (rookCastleStart != null){
+            // These get changed in do move if castles happens
+            rookCastle.setMoved(false);
+            cb.setPieceAt(new Nothing(true), rookCastleEnd);
+            cb.setPieceAt(rookCastle, rookCastleStart);
+        }
+        positions.replace(tempPosition, positions.get(tempPosition) - 1);
+        whiteTurn = !whiteTurn;
+        cb.attackOnTiles();
+        cb.updatePieceSets();
     }
 
     public HashMap<String, Integer> getPositionsMap(){
@@ -46,7 +124,6 @@ public class Gamelogic {
             positions.put(position, 1);
         }
     }
-
     /** Returns the current position in String form. Does not add to
      * the hashmap. */
     public String getPositionString(){
@@ -79,7 +156,6 @@ public class Gamelogic {
 
         return builder.toString();
     }
-
     /** Determines the castling privileges of a given color translated to a string */
     private String castlingPrivilege(boolean forWhite){
         String privilege = "b";
@@ -133,9 +209,6 @@ public class Gamelogic {
         }
         return false;
     }
-
-
-
 
     /** Parses the input to see if it is valid formatting, and then
      * determines if this is a valid move. If not, then return false. If
@@ -219,16 +292,17 @@ public class Gamelogic {
             return false;
         }
         // Add move to the moves made.
-        if (promotion.isEmpty()){
-            movesList.addLast(input);
-        } else {
-            movesList.addLast(input + "=" + promotion);
-        }
-        doMove(start, end, promotion);
+        movesList.add(input);
+        doMove(start, end, promotion, false);
         p.setMoved();
         whiteTurn = !whiteTurn;
         cb.attackOnTiles();
         return true;
+    }
+
+    /** Do move that is not temporary. */
+    public void doMove(String start, String end){
+        doMove(start, end, false);
     }
 
     /** Moves the piece at start to the tile at end. Replacing and deleting the piece
@@ -236,7 +310,7 @@ public class Gamelogic {
      * checks should be done before. In the case of en passant, the piece next to the pawn
      * will be removed. If castles, then king and rook are moved. If pawn promotion then user
      * is prompted on what piece they want. */
-    public void doMove(String start, String end){
+    public void doMove(String start, String end, boolean temp){
         Piece startPiece = cb.getPieceAt(start);
         Tile endTile = cb.getTile(end);
         // Set en passant to default;
@@ -284,10 +358,15 @@ public class Gamelogic {
                     col = 0;    // Means left side.
                     mult = 3;
                 }
+
+                if (temp){
+                    rookCastleStart = cb.convertToIndex(col, row);
+                    rookCastleEnd = cb.convertToIndex(col + mult, row);
+                    rookCastle = cb.getPieceAt(rookCastleStart);
+                }
                 // Do move on rook.
                 cb.getPieceAt(cb.convertToIndex(col, row)).setMoved();
                 doMove(cb.convertToIndex(col, row), cb.convertToIndex(col + mult, row));
-
             }
         }
         // Set ending tile's piece to the starting piece.
@@ -297,7 +376,7 @@ public class Gamelogic {
 
     /** The promotion string can either be 'q', 'n', 'b', 'r' indicating desired
      * piece to promote */
-    public void doMove(String start, String end, String promotion){
+    public void doMove(String start, String end, String promotion, boolean temp){
         if (!promotion.isEmpty()){
             cb.setEnPassant("");
             Piece startPiece = cb.getPieceAt(start);
@@ -313,7 +392,7 @@ public class Gamelogic {
             endTile.setPiece(startPiece);
             removePieceAt(start);
         } else {
-            doMove(start, end);
+            doMove(start, end, temp);
         }
     }
 
@@ -362,5 +441,6 @@ public class Gamelogic {
     public void setTurn(boolean whiteTurn){
         this.whiteTurn = whiteTurn;
     }
+
 
 }

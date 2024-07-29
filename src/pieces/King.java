@@ -132,6 +132,16 @@ public class King implements Piece{
         isMoved = true;
     }
 
+    /**
+     * Sets the move status of the piece to the given boolean value.
+     *
+     * @param b
+     */
+    @Override
+    public void setMoved(boolean b) {
+        isMoved = b;
+    }
+
     @Override
     public boolean isMoved(){
         return isMoved;

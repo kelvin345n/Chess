@@ -26,7 +26,7 @@ public class NeuralNetReader {
     public static NeuralNet2 loadNetwork(String fileName){
         try {
             // All the saves done will be from the FrameworkML/Saves directory
-            String directoryPath = "C:\\Users\\nkelv\\OneDrive\\Desktop\\jv\\ml_test\\Ep2\\FrameworkML\\Saves";
+            String directoryPath = "src/FrameworkML/Saves";
             FileReader reader = new FileReader(directoryPath + File.separator + fileName);
             Scanner scan = new Scanner(reader);
             int[] inShape = readIntArray(scan.nextLine());
@@ -192,7 +192,7 @@ public class NeuralNetReader {
 
     /** Delete the neural network under "fileName" */
     public static void deleteSave(String fileName){
-        String directoryPath = "C:\\Users\\nkelv\\OneDrive\\Desktop\\jv\\ml_test\\Ep2\\FrameworkML\\Saves";
+        String directoryPath = "src/FrameworkML/Saves";
         Path path = Paths.get(directoryPath + File.separator + fileName);
         try {
             // Delete the file

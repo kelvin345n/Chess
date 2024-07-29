@@ -163,7 +163,7 @@ public class NeuralNet2 {
     public void saveNetwork(String fileName){
         try {
             // Specify the directory path
-            String directoryPath = "C:\\Users\\nkelv\\OneDrive\\Desktop\\jv\\ml_test\\Ep2\\FrameworkML\\Saves";
+            String directoryPath = "src/FrameworkML/Saves";
             // Create a File object representing the new file
             File file = new File(directoryPath + File.separator + fileName);
 

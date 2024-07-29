@@ -5,7 +5,7 @@ import FrameworkML.Matrix;
 
 /** Used to encode a position of a current chess game into a tensor to use
  * in neural network training. */
-public class positionEncoder {
+public class PositionEncoder {
 
     /** Given a Game we encode the current position into a 10x10x16 tensor for the current color
      * (Color next to move)

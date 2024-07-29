@@ -116,14 +116,14 @@ public class GamelogicTester {
 
         b.setPieceAt(new Pawn(true), "b7");
 
-        g.doMove("b7", "a8", "q");
+        g.doMove("b7", "a8", "q", false);
         assertThat(Piece.isQueen(b.getPieceAt("a8"))).isEqualTo(true);
         assertThat(b.getPieceAt("a8").isWhiteTeam()).isEqualTo(true);
         assertThat(b.getPieceAt("b7").isPiece()).isEqualTo(false);
         assertThat(b.getPieceAt("a7").isPiece()).isEqualTo(true);
 
         b.setPieceAt(new Pawn(false), "c2");
-        g.doMove("c2", "b1", "n");
+        g.doMove("c2", "b1", "n", false);
 
         assertThat(Piece.isKnight(b.getPieceAt("b1"))).isEqualTo(true);
         assertThat(b.getPieceAt("b1").isWhiteTeam()).isEqualTo(false);
@@ -134,7 +134,7 @@ public class GamelogicTester {
         b = g.getChessBoard();
 
         b.setPieceAt(new Pawn(true), "b7");
-        g.doMove("b7", "a8", "r");
+        g.doMove("b7", "a8", "r", false);
 
         assertThat(Piece.isRook(b.getPieceAt("a8"))).isEqualTo(true);
         assertThat(b.getPieceAt("a8").isWhiteTeam()).isEqualTo(true);
@@ -143,7 +143,7 @@ public class GamelogicTester {
 
         b.setPieceAt(new Pawn(false), "c2");
         b.setPieceAt(new Nothing(true), "c1");
-        g.doMove("c2", "c1", "b");
+        g.doMove("c2", "c1", "b", false);
 
         assertThat(Piece.isBishop(b.getPieceAt("c1"))).isEqualTo(true);
         assertThat(b.getPieceAt("c1").isWhiteTeam()).isEqualTo(false);

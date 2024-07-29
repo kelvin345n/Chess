@@ -8,7 +8,6 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class GameBotVsBot {
-
     public GameBotVsBot(ChessBoard b, List<String> moves, boolean orientWhite, Bot oneBot, Bot twoBot){
         Game g = new Game(b, moves);
         Gamelogic gl = g.getGamelogic();
@@ -46,6 +45,5 @@ public class GameBotVsBot {
     public GameBotVsBot(Bot oneBot, Bot twoBot){
         this(new ChessBoard(), new ArrayList<>(), true, oneBot, twoBot);
     }
-
 
 }

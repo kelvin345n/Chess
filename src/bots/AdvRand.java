@@ -1,18 +1,16 @@
 package bots;
 
-import board.ChessBoard;
 import board.Game;
 import board.Gamelogic;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
-/** This bot chooses a random move from the current position. */
-public class RandomBot implements Bot {
+/** This bot is also a random move bot, but if there exists a move that creates
+ * checkmate, then this bot takes it.  */
+public class AdvRand implements Bot{
+    public AdvRand(){
 
-    public RandomBot(){
     }
     /**
      * When given a chessboard of the current position, the bot returns a random move
@@ -26,6 +24,17 @@ public class RandomBot implements Bot {
         Gamelogic logic = game.getGamelogic();
         boolean turn = logic.isWhiteTurn();
         List<String> moves = logic.allPossibleMoves(logic.isWhiteTurn());
+        for (String move: moves){
+            game.tempMove(move);
+            if (game.tempGameOver()){
+                if (game.getPoints(turn) == 1){
+                    game.reverseMove();
+                    // if this move leads to checkmate... return move.
+                    return move;
+                }
+            }
+            game.reverseMove();
+        }
         return moves.get(rand.nextInt(moves.size()));
     }
 }

@@ -11,6 +11,250 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 
 public class GameTester {
+
+    @Test
+    public void tempMoveTest(){
+
+        ChessBoard cbb = new ChessBoard();
+        Game gg = new Game(cbb, new ArrayList<>());
+        gg.move("b2 -> b4");
+        assertThat(cbb.getEnPassant()).isEqualTo("b4");
+        gg.tempMove("g7 -> g5");
+        assertThat(Piece.isPawn(cbb.getPieceAt("g5"))).isEqualTo(true);
+        assertThat(cbb.getEnPassant()).isEqualTo("g5");
+        gg.reverseMove();
+        assertThat(Piece.isPawn(cbb.getPieceAt("g7"))).isEqualTo(true);
+        assertThat(cbb.getEnPassant()).isEqualTo("b4");
+        gg.move("g7 -> g5");
+        gg.move("c1 -> b2");
+        gg.move("g5 -> g4");
+        assertThat(cbb.getEnPassant()).isEqualTo("");
+        gg.tempMove("h2 -> h4");
+        assertThat(cbb.getEnPassant()).isEqualTo("h4");
+        assertThat(Piece.isPawn(cbb.getPieceAt("h4"))).isEqualTo(true);
+        gg.reverseMove();
+        assertThat(cbb.getEnPassant()).isEqualTo("");
+        assertThat(Piece.isPawn(cbb.getPieceAt("h2"))).isEqualTo(true);
+        assertThat(Piece.isPawn(cbb.getPieceAt("h4"))).isEqualTo(false);
+        gg.move("h2 -> h4");
+        assertThat(cbb.getEnPassant()).isEqualTo("h4");
+        gg.tempMove("g4 -> h3");
+        assertThat(cbb.getEnPassant()).isEqualTo("");
+        assertThat(Piece.isPawn(cbb.getPieceAt("h3"))).isEqualTo(true);
+        assertThat(Piece.isPawn(cbb.getPieceAt("g4"))).isEqualTo(false);
+        assertThat(Piece.isPawn(cbb.getPieceAt("h4"))).isEqualTo(false);
+        gg.reverseMove();
+        assertThat(cbb.getEnPassant()).isEqualTo("h4");
+        assertThat(Piece.isPawn(cbb.getPieceAt("h3"))).isEqualTo(false);
+        assertThat(Piece.isPawn(cbb.getPieceAt("g4"))).isEqualTo(true);
+        assertThat(Piece.isPawn(cbb.getPieceAt("h4"))).isEqualTo(true);
+        assertThat(gg.move("g4 -> h3")).isEqualTo(true);
+
+        Game g = new Game();
+        ChessBoard cb = g.getGamelogic().getChessBoard();
+        cb.setPieceAt(new Nothing(true), "d1");
+        cb.setPieceAt(new Nothing(true), "c1");
+        cb.setPieceAt(new Nothing(true), "b1");
+        g.tempMove("e1 -> c1");
+        assertThat(Piece.isKing(cb.getPieceAt("c1"))).isEqualTo(true);
+        assertThat(Piece.isRook(cb.getPieceAt("d1"))).isEqualTo(true);
+        g.reverseMove();
+        assertThat(Piece.isKing(cb.getPieceAt("e1"))).isEqualTo(true);
+        assertThat(Piece.isRook(cb.getPieceAt("a1"))).isEqualTo(true);
+        assertThat(g.move("e1 -> c1")).isEqualTo(true);
+
+
+        g = new Game();
+        cb = g.getGamelogic().getChessBoard();
+        ChessBoardDrawer dr = new ChessBoardDrawer(cb, true);
+        cb.setPieceAt(new Nothing(true), "d8");
+        cb.setPieceAt(new Nothing(true), "c8");
+        cb.setPieceAt(new Nothing(true), "b8");
+        g.move("e2 -> e4");
+        g.tempMove("e8 -> c8");
+        assertThat(Piece.isKing(cb.getPieceAt("c8"))).isEqualTo(true);
+        assertThat(Piece.isRook(cb.getPieceAt("d8"))).isEqualTo(true);
+        g.reverseMove();
+        assertThat(Piece.isKing(cb.getPieceAt("e8"))).isEqualTo(true);
+        assertThat(Piece.isRook(cb.getPieceAt("a8"))).isEqualTo(true);
+        assertThat(g.move("e8 -> c8")).isEqualTo(true);
+
+        g = new Game();
+        cb = g.getGamelogic().getChessBoard();
+        g.tempMove("e2 -> e4");
+        assertThat(cb.getEnPassant()).isEqualTo("e4");
+        g.reverseMove();
+        assertThat(cb.getPieceAt("e2").isMoved()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        g.move("e2 -> e4");
+        assertThat(cb.getEnPassant()).isEqualTo("e4");
+        assertThat(cb.getPieceAt("e4").isMoved()).isEqualTo(true);
+
+        cb = new ChessBoard();
+        cb.setPieceAt(new Pawn(true), "g7");
+        g = new Game(cb, new ArrayList<>());
+        g.tempMove("g7 -> h8=q");
+        assertThat(Piece.isQueen(cb.getPieceAt("h8"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("h8").isWhiteTeam()).isEqualTo(true);
+        g.reverseMove();
+        assertThat(Piece.isRook(cb.getPieceAt("h8"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("h8").isWhiteTeam()).isEqualTo(false);
+        assertThat(Piece.isPawn(cb.getPieceAt("g7"))).isEqualTo(true);
+
+
+        g = new Game();
+        cb = g.getGamelogic().getChessBoard();
+        g.move("e2 -> e4");
+        g.move("g8 -> f6");
+        g.move("e4 -> e5");
+        g.move("d7 -> d5");
+        assertThat(cb.getEnPassant()).isEqualTo("d5");
+        g.tempMove("e5 -> d6");
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        assertThat(Piece.isPawn(cb.getPieceAt("d6"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("d6").isWhiteTeam()).isEqualTo(true);
+        g.reverseMove();
+        assertThat(cb.getEnPassant()).isEqualTo("d5");
+        assertThat(Piece.isPawn(cb.getPieceAt("e5"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("e5").isWhiteTeam()).isEqualTo(true);
+
+        g = new Game();
+        cb = g.getGamelogic().getChessBoard();
+        g.move("e2 -> e4");
+        g.move("d7 -> d5");
+        g.move("f1 -> e2");
+        g.move("c8 -> e6");
+        g.move("g1 -> f3");
+        g.move("d8 -> d6");
+        g.tempMove("e1 -> g1");
+        assertThat(Piece.isKing(cb.getPieceAt("g1"))).isEqualTo(true);
+        assertThat(Piece.isRook(cb.getPieceAt("f1"))).isEqualTo(true);
+        g.reverseMove();
+        assertThat(Piece.isKing(cb.getPieceAt("e1"))).isEqualTo(true);
+        assertThat(Piece.isRook(cb.getPieceAt("h1"))).isEqualTo(true);
+        g.move("e1 -> g1");
+        assertThat(Piece.isKing(cb.getPieceAt("g1"))).isEqualTo(true);
+        assertThat(Piece.isRook(cb.getPieceAt("f1"))).isEqualTo(true);
+
+        g.tempMove("g8 -> f6");
+        g.reverseMove();
+        g.move("g8 -> f6");
+        g.move("h2 -> h3");
+        g.move("f6 -> g4");
+        g.tempMove("g1 -> h1");
+        g.reverseMove();
+        g.move("f3 -> e1");
+        assertThat(g.isGameOver()).isEqualTo(false);
+        g.tempMove("d6 -> h2");
+        assertThat(g.isGameOver()).isEqualTo(true);
+        assertThat(g.getPoints(true)).isEqualTo(0f);
+        assertThat(g.getPoints(false)).isEqualTo(1f);
+        g.reverseMove();
+        assertThat(g.isGameOver()).isEqualTo(false);
+        assertThat(g.getPoints(true)).isEqualTo(0f);
+        assertThat(g.getPoints(false)).isEqualTo(0f);
+
+// Smothered Mate
+        Game game = new Game();
+        game.move("e2 -> e4");
+        game.move("c7 -> c6");
+        game.move("d2 -> d4");
+        game.move("d7 -> d5");
+        assertThat(game.isGameOver()).isEqualTo(false);
+        assertThat(game.getPoints(true)).isEqualTo(0f);
+        assertThat(game.getPoints(false)).isEqualTo(0f);
+        game.move("b1 -> c3");
+        game.move("d5 -> e4");
+        game.move("c3 -> e4");
+        game.move("b8 -> d7");
+        game.move("d1 -> e2");
+        game.move("g8 -> f6");
+        assertThat(game.isGameOver()).isEqualTo(false);
+        assertThat(game.getPoints(true)).isEqualTo(0f);
+        assertThat(game.getPoints(false)).isEqualTo(0f);
+        game.tempMove("e4 -> d6");
+        assertThat(game.tempGameOver()).isEqualTo(true);
+        assertThat(game.getPoints(true)).isEqualTo(1f);
+        assertThat(game.getPoints(false)).isEqualTo(0f);
+        game.reverseMove();
+        assertThat(game.isGameOver()).isEqualTo(false);
+        assertThat(game.getPoints(true)).isEqualTo(0f);
+        assertThat(game.getPoints(false)).isEqualTo(0f);
+
+        ChessBoard b = new ChessBoard();
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                // Replace all pieces with nothing.
+                b.setPieceAt(new Nothing(true), b.convertToIndex(i, j));
+            }
+        }
+        b.setPieceAt(new King(true), "e2");
+        b.setPieceAt(new King(false), "e5");
+        game = new Game(b, new ArrayList<>());
+        assertThat(game.isGameOver()).isEqualTo(true);
+        assertThat(game.getPoints(true)).isEqualTo(0.5f);
+        assertThat(game.getPoints(false)).isEqualTo(0.5f);
+
+        b.setPieceAt(new Pawn(false), "e3");
+        game = new Game(b, new ArrayList<>());
+        assertThat(game.isGameOver()).isEqualTo(false);
+        assertThat(game.getPoints(true)).isEqualTo(0f);
+        assertThat(game.getPoints(false)).isEqualTo(0f);
+        game.tempMove("e2 -> e3");
+        assertThat(Piece.isKing(b.getPieceAt("e3"))).isEqualTo(true);
+        assertThat(game.tempGameOver()).isEqualTo(true);
+        assertThat(game.getPoints(true)).isEqualTo(0.5f);
+        assertThat(game.getPoints(false)).isEqualTo(0.5f);
+        game.reverseMove();
+        assertThat(Piece.isPawn(b.getPieceAt("e3"))).isEqualTo(true);
+        assertThat(Piece.isKing(b.getPieceAt("e2"))).isEqualTo(true);
+        assertThat(game.isGameOver()).isEqualTo(false);
+        assertThat(game.getPoints(true)).isEqualTo(0f);
+        assertThat(game.getPoints(false)).isEqualTo(0f);
+
+        // 3-fold rep
+        game = new Game();
+        game.move("e2 -> e4");
+        game.move("g7 -> g6");
+        game.move("e4 -> e5");
+        game.move("d7 -> d5");
+        assertThat(game.isGameOver()).isEqualTo(false);
+        game.move("f1 -> e2");
+        game.move("c8 -> d7");
+        game.move("e2 -> f1");
+        game.move("d7 -> c8");
+        game.move("f1 -> e2");
+        assertThat(game.isGameOver()).isEqualTo(false);
+        game.move("c8 -> d7");
+        assertThat(game.isGameOver()).isEqualTo(false);
+        game.move("e2 -> f1");
+        assertThat(game.isGameOver()).isEqualTo(false);
+        game.move("d7 -> c8");
+        assertThat(game.isGameOver()).isEqualTo(false);
+        game.tempMove("f1 -> e2");
+        assertThat(game.tempGameOver()).isEqualTo(true);
+        assertThat(game.getPoints(true)).isEqualTo(0.5f);
+        assertThat(game.getPoints(false)).isEqualTo(0.5f);
+        game.reverseMove();
+        assertThat(game.isGameOver()).isEqualTo(false);
+        game.tempMove("f1 -> e2");
+        assertThat(game.tempGameOver()).isEqualTo(true);
+        assertThat(game.getPoints(true)).isEqualTo(0.5f);
+        assertThat(game.getPoints(false)).isEqualTo(0.5f);
+        game.reverseMove();
+        assertThat(game.isGameOver()).isEqualTo(false);
+        game.tempMove("f1 -> e2");
+        assertThat(game.tempGameOver()).isEqualTo(true);
+        assertThat(game.getPoints(true)).isEqualTo(0.5f);
+        assertThat(game.getPoints(false)).isEqualTo(0.5f);
+        game.reverseMove();
+        assertThat(game.isGameOver()).isEqualTo(false);
+        game.move("f1 -> e2");
+        assertThat(game.isGameOver()).isEqualTo(true);
+        assertThat(game.getPoints(true)).isEqualTo(0.5f);
+        assertThat(game.getPoints(false)).isEqualTo(0.5f);
+    }
+
     @Test
     public void pawnPromotionTest(){
         Game game = new Game();
