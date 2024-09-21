@@ -8,5 +8,6 @@ public interface Bot {
      * move from the current possible moves */
     String nextMove(Game game);
 
+    String name();
 
 }

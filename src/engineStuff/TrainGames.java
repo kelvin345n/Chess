@@ -2,19 +2,14 @@ package engineStuff;
 
 import FrameworkML.Matrix;
 import FrameworkML.NeuralNet2;
-import FrameworkML.Operations;
-import board.Game;
 import board.GameBvBNoI;
-import bots.AdvRand;
 import bots.AlphaBota;
 import bots.Bot;
-import bots.RandomBot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Trains the network from randomly played chess games. */
-public class TrainRandom {
+public class TrainGames {
     /** Given a number of games for 1 epoch, meaning we play that many games, add them into one training set
      * and update the parameters in the neural network by learning rate one time. */
     public static void sim(int gamesCount, NeuralNet2 nn, float learningRate){
@@ -68,5 +63,10 @@ public class TrainRandom {
         nn.trainNetwork(trainingExamples, trainActual, learningRate);
         System.out.println("Cost after training: " + nn.cost(trainingExamples, trainActual));
     }
+
+
+
+
+
 
 }

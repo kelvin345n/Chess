@@ -71,6 +71,7 @@ public class NeuralNetReader {
                 break;
             case "bce":
                 c = new BinaryCrossEntropy();
+                break;
             default:
                 throw new IllegalArgumentException("Cost function: " + cost + " not recognized.");
         }

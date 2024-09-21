@@ -7,16 +7,21 @@ import board.ChessBoard;
 import board.Game;
 import board.Gamelogic;
 import engineStuff.PositionEncoder;
+import org.objectweb.asm.tree.analysis.Value;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /** This bot uses alpha beta pruning to determine the next best move. */
 public class AlphaBota implements Bot {
     NeuralNet2 engine;
-    public AlphaBota(NeuralNet2 chessEngine){
+    // How deep in the tree we want to search
+    int depth;
+    // Epsilon value to judge moves close in EV
+    float eps;
+    public AlphaBota(NeuralNet2 chessEngine, int depth, float eps){
         engine = chessEngine;
+        this.depth = depth;
+        this.eps = eps;
     }
 
     /**
@@ -27,17 +32,12 @@ public class AlphaBota implements Bot {
      */
     @Override
     public String nextMove(Game game) {
-        Random rand = new Random();
-        // Probably to start
-        Gamelogic logic = game.getGamelogic();
-        List<String> moves = logic.allPossibleMoves(logic.isWhiteTurn());
+        return nextMoveHelper(game, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+    }
 
-        // Instead of getting the max value of the next move, we get the min value
-        // because when we evaluate the next move using the neural network, it evaluates that position
-        // as if the next color was next to act. So we choose the move that decreases the
-        // opponent's EV.
-
-        return null;
+    @Override
+    public String name() {
+        return "AlphaBeta";
     }
 
     /**
@@ -66,41 +66,100 @@ public class AlphaBota implements Bot {
      *
      * */
 
+    private String nextMoveHelper(Game game, float alpha, float beta){
+        Random rand = new Random();
+        // We will store all the moves that could be used.
+        Gamelogic logic = game.getGamelogic();
+        // Keep track of all the candidate moves that are close in EV.
+        List<String> candidateMoves = new ArrayList<>();
+        List<String> moves = logic.allPossibleMoves(logic.isWhiteTurn());
+        Collections.shuffle(moves);
+        // The averageEV of all candidateMoves
+        float avgEv = 0;
+        float totalEv = 0;
+        for (String move : moves){
+            game.tempMove(move);
+            // This gives the expected value for the currColor
+            float eval = 1f - alphabeta(game, alpha, beta, depth-1, false);
+            System.out.println(move + ": " + eval);
+            game.reverseMove();
+            if (eval > (avgEv + eps)){
+                candidateMoves.clear();
+                candidateMoves.add(move);
+                totalEv = eval;
+                avgEv = eval;
+            } else if (eval >= avgEv || eval > (avgEv - eps)) {
+                candidateMoves.add(move);
+                totalEv += eval;
+                avgEv = totalEv/candidateMoves.size();
+            }
+            alpha = Math.max(alpha, eval);
+            if (beta <= alpha){
+                break;
+            }
+        }
+        return candidateMoves.get(rand.nextInt(candidateMoves.size()));
+    }
 
 
     /** Given a current position, does alpha-beta pruning to
      * determine the best move for the current player */
-    public float alphabeta(Game g, float alpha, float beta, int depth){
+    private float alphabeta(Game g, float alpha, float beta, int depth, boolean currColor){
         Gamelogic logic = g.getGamelogic();
-        float value;
+        // The other color made the current move. So since the neural network evaluates the
+        // position for the color next to move, we must also return the value for the
+        // color that is next to move.
+        if (g.tempGameOver()){
+            return g.getPoints(logic.isWhiteTurn());
+        }
         if (depth == 0){
-
-
-
-            Matrix[] encoded = PositionEncoder.encode(g);
-            // This should give us a row vector (win draw loss) that represent probabilities for each outcome.
-            Matrix[] inference = engine.inference(encoded);
-            // win receives 1 point, draw = 0.5, and loss = 0.
-            Matrix values = new Matrix(1, 3, new float[]{1f, 0.5f, 0f});
-
-            Matrix m = Operations.hadamard(inference[0], values);
-            float ev = Operations.elementSum(m);
-
+            return evOfPosition(g);
         }
 
-        for (String move : logic.allPossibleMoves(logic.isWhiteTurn())){
-            // For every move create a new game after making that move.
-            List<String> copy = new ArrayList<>(logic.movesList());
-            copy.add(move);
-            // New game with this new move.
-            Game newGame = new Game(new ChessBoard(), copy);
-            // TODO: We have to code if the new game is game over then give value
-            //          automatically.
-
-
+        if (currColor){
+            float maxEval = Float.NEGATIVE_INFINITY;
+            List<String> moves = logic.allPossibleMoves(logic.isWhiteTurn());
+            Collections.shuffle(moves);
+            for (String move : moves){
+                g.tempMove(move);
+                // This gives the expected value for the currColor
+                float eval = 1f - alphabeta(g, alpha, beta, depth-1, false);
+                g.reverseMove();
+                maxEval = Math.max(maxEval, eval);
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha){
+                    break;
+                }
+            }
+            return maxEval;
+        } else {
+            float minEval = Float.POSITIVE_INFINITY;
+            List<String> moves = logic.allPossibleMoves(logic.isWhiteTurn());
+            Collections.shuffle(moves);
+            for (String move : moves){
+                g.tempMove(move);
+                // The opposing color wants to minimize the curr colors EV
+                float eval = alphabeta(g, alpha, beta, depth-1, true);
+                g.reverseMove();
+                minEval = Math.min(minEval, eval);
+                beta = Math.min(beta, eval);
+                if (beta <= alpha){
+                    break;
+                }
+            }
+            return minEval;
         }
-
-        return 0;
     }
 
+    /** Given a chess game, we evaluate that current position given using the
+     * given neural network. And return the expected value. */
+    public float evOfPosition(Game g){
+        Matrix[] encoded = PositionEncoder.encode(g);
+        // This should give us a row vector (win draw loss) that represent probabilities for each outcome.
+        Matrix[] inference = engine.inference(encoded);
+        // win receives 1 point, draw = 0.5, and loss = 0.
+        Matrix values = new Matrix(1, 3, new float[]{1f, 0.5f, 0f});
+        Matrix m = Operations.hadamard(inference[0], values);
+        return Operations.elementSum(m);
+    }
 }

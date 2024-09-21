@@ -20,25 +20,27 @@ public class Gamelogic {
     // Must also include all possible moves and castling privileges.
     private HashMap<String, Integer> positions;
 
-    // All these are for the temp move.
-    private String startTile;
-    private String endTile;
-    private Piece startPiece;
-    private Piece endPiece;
+//    // All these are for the temp move.
+//    private String startTile;
+//    private String endTile;
+//    private Piece startPiece;
+//    private Piece endPiece;
+//
+//    private String enPassTile;
+//    private Piece enPassPiece;
+//    private String tempPosition;
+//
+//    private String rookCastleEnd;
+//    private String rookCastleStart;
+//    private Piece rookCastle;
 
-    private String enPassTile;
-    private Piece enPassPiece;
-    private String tempPosition;
+    List<tempMoveNode> nodeList;
 
-    private String rookCastleEnd;
-    private String rookCastleStart;
-    private Piece rookCastle;
-
-
-    // Tracks what the start piece isMoved attribute was set to.
-    private boolean startPieceMove;
+//    // Tracks what the start piece isMoved attribute was set to.
+//    private boolean startPieceMove;
 
     public Gamelogic(ChessBoard cb){
+        nodeList = new ArrayList<>();
         this.cb = cb;
         whiteTurn = true;
         movesList = new ArrayList<>();
@@ -63,53 +65,68 @@ public class Gamelogic {
         if (move.length() == 10){
             promotion = move.substring(9);
         }
-        enPassTile = cb.getEnPassant();
-        enPassPiece = null;
-        if (!enPassTile.isEmpty()){
-            enPassPiece = cb.getPieceAt(enPassTile);
-        }
-        startTile = start;
-        endTile = end;
-        startPiece = cb.getPieceAt(start);
-        endPiece = cb.getPieceAt(end);
-        startPieceMove = startPiece.isMoved();
 
+        tempMoveNode n = new tempMoveNode();
+        nodeList.addLast(n);
+        n.enPassTile = cb.getEnPassant();
+        n.enPassPiece = null;
+        if (!n.enPassTile.isEmpty()){
+            n.enPassPiece = cb.getPieceAt(n.enPassTile);
+        }
+        n.startTile = start;
+        n.endTile = end;
+        n.startPiece = cb.getPieceAt(start);
+        n.endPiece = cb.getPieceAt(end);
+        n.startPieceMove = n.startPiece.isMoved();
         // Should get changed if there was castling involved.
-        rookCastleStart = null;
+        n.rookCastle = null;
+//        enPassTile = cb.getEnPassant();
+//        enPassPiece = null;
+//        if (!enPassTile.isEmpty()){
+//            enPassPiece = cb.getPieceAt(enPassTile);
+//        }
+//        startTile = start;
+//        endTile = end;
+//        startPiece = cb.getPieceAt(start);
+//        endPiece = cb.getPieceAt(end);
+//        startPieceMove = startPiece.isMoved();
+//        rookCastleStart = null;
 
         boolean temp = true;
         doMove(start, end, promotion, temp);
-        startPiece.setMoved();
+        n.startPiece.setMoved();
         whiteTurn = !whiteTurn;
         cb.attackOnTiles();
         cb.updatePieceSets();
-        tempPosition = getPositionString();
+        n.tempPosition = getPositionString();
         // The move was made, so we add that new position to the hashmap.
-        addPosition(tempPosition);
+        addPosition(n.tempPosition);
     }
     /** When temp move is called then reverse move reverses positions, moveslist,
      * turn, and chessboard. Also if piece has not moved, set to back to unmoved.
      * Also sets enpass string back to normal. */
     public void reverseMove(){
-        startPiece.setMoved(startPieceMove);
-        cb.setPieceAt(startPiece, startTile);
-        cb.setPieceAt(endPiece, endTile);
+        tempMoveNode n = nodeList.getLast();
+        n.startPiece.setMoved(n.startPieceMove);
+        cb.setPieceAt(n.startPiece, n.startTile);
+        cb.setPieceAt(n.endPiece, n.endTile);
 
-        cb.setEnPassant(enPassTile);
-        if (!enPassTile.isEmpty()){
-            cb.setPieceAt(enPassPiece, enPassTile);
+        cb.setEnPassant(n.enPassTile);
+        if (!n.enPassTile.isEmpty()){
+            cb.setPieceAt(n.enPassPiece, n.enPassTile);
         }
 
-        if (rookCastleStart != null){
+        if (n.rookCastleStart != null){
             // These get changed in do move if castles happens
-            rookCastle.setMoved(false);
-            cb.setPieceAt(new Nothing(true), rookCastleEnd);
-            cb.setPieceAt(rookCastle, rookCastleStart);
+            n.rookCastle.setMoved(false);
+            cb.setPieceAt(new Nothing(true), n.rookCastleEnd);
+            cb.setPieceAt(n.rookCastle, n.rookCastleStart);
         }
-        positions.replace(tempPosition, positions.get(tempPosition) - 1);
+        positions.replace(n.tempPosition, positions.get(n.tempPosition) - 1);
         whiteTurn = !whiteTurn;
         cb.attackOnTiles();
         cb.updatePieceSets();
+        nodeList.removeLast();
     }
 
     public HashMap<String, Integer> getPositionsMap(){
@@ -360,9 +377,10 @@ public class Gamelogic {
                 }
 
                 if (temp){
-                    rookCastleStart = cb.convertToIndex(col, row);
-                    rookCastleEnd = cb.convertToIndex(col + mult, row);
-                    rookCastle = cb.getPieceAt(rookCastleStart);
+                    tempMoveNode n = nodeList.getLast();
+                    n.rookCastleStart = cb.convertToIndex(col, row);
+                    n.rookCastleEnd = cb.convertToIndex(col + mult, row);
+                    n.rookCastle = cb.getPieceAt(n.rookCastleStart);
                 }
                 // Do move on rook.
                 cb.getPieceAt(cb.convertToIndex(col, row)).setMoved();

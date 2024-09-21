@@ -13,6 +13,196 @@ import static com.google.common.truth.Truth.assertThat;
 public class GameTester {
 
     @Test
+    public void multipleTempMoveTest(){
+        Game g = new Game();
+        ChessBoard cb = g.getGamelogic().getChessBoard();
+        ChessBoardDrawer d = new ChessBoardDrawer(cb, true);
+        g.tempMove("e2 -> e4");
+        assertThat(g.getGamelogic().isWhiteTurn()).isFalse();
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("e4"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("e4").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("e4").isWhiteTeam()).isEqualTo(true);
+        assertThat(cb.getPieceAt("e2").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("e4");
+        g.tempMove("d7 -> d5");
+        assertThat(g.getGamelogic().isWhiteTurn()).isTrue();
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("d5"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("d5").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("d5").isWhiteTeam()).isEqualTo(false);
+        assertThat(cb.getPieceAt("d7").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("d5");
+        g.tempMove("e4 -> d5");
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("d5"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("d5").isWhiteTeam()).isEqualTo(true);
+        assertThat(cb.getPieceAt("e4").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        g.tempMove("c7 -> c5");
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("c5"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("c5").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("c5").isWhiteTeam()).isEqualTo(false);
+        assertThat(cb.getPieceAt("c7").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("c5");
+        g.tempMove("d5 -> c6");
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("c6"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("c6").isWhiteTeam()).isEqualTo(true);
+        assertThat(cb.getPieceAt("c5").isPiece()).isEqualTo(false);
+        assertThat(cb.getPieceAt("d5").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        g.tempMove("g8 -> f6");
+        d.draw(2000);
+        assertThat(Piece.isKnight(cb.getPieceAt("f6"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("f6").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("f6").isWhiteTeam()).isEqualTo(false);
+        assertThat(cb.getPieceAt("g8").isPiece()).isEqualTo(false);
+        g.tempMove("f1 -> b5");
+        d.draw(2000);
+        assertThat(Piece.isBishop(cb.getPieceAt("b5"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("b5").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("b5").isWhiteTeam()).isEqualTo(true);
+        assertThat(cb.getPieceAt("f1").isPiece()).isEqualTo(false);
+        g.tempMove("e7 -> e5");
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("e5"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("e5").isWhiteTeam()).isEqualTo(false);
+        assertThat(cb.getPieceAt("c7").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("e5");
+        g.tempMove("g1 -> e2");
+        d.draw(2000);
+        assertThat(Piece.isKnight(cb.getPieceAt("e2"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("e2").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("e2").isWhiteTeam()).isEqualTo(true);
+        assertThat(cb.getPieceAt("g1").isPiece()).isEqualTo(false);
+        g.tempMove("f8 -> c5");
+        d.draw(2000);
+        assertThat(Piece.isBishop(cb.getPieceAt("c5"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("c5").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("c5").isWhiteTeam()).isEqualTo(false);
+        assertThat(cb.getPieceAt("f8").isPiece()).isEqualTo(false);
+        g.tempMove("e1 -> g1");
+        d.draw(2000);
+        assertThat(Piece.isRook(cb.getPieceAt("f1"))).isEqualTo(true);
+        assertThat(Piece.isKing(cb.getPieceAt("g1"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("f1").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("g1").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("e1").isPiece()).isEqualTo(false);
+        assertThat(cb.getPieceAt("h1").isPiece()).isEqualTo(false);
+        g.tempMove("f6 -> g4");
+        d.draw(2000);
+        g.tempMove("c2 -> c4");
+        d.draw(2000);
+        g.tempMove("d8 -> h4");
+        d.draw(2000);
+        g.tempMove("e2 -> g3");
+        d.draw(2000);
+        assertThat(g.tempGameOver()).isEqualTo(false);
+        g.tempMove("h4 -> h2");
+        d.draw(2000);
+        assertThat(g.tempGameOver()).isEqualTo(true);
+        assertThat(g.getPoints(false)).isEqualTo(1f);
+        assertThat(g.getPoints(true)).isEqualTo(0f);
+        assertThat(Piece.isQueen(cb.getPieceAt("h2"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("h2").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("h2").isWhiteTeam()).isEqualTo(false);
+        assertThat(cb.getPieceAt("h4").isPiece()).isEqualTo(false);
+
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(g.tempGameOver()).isEqualTo(false);
+        assertThat(g.getPoints(false)).isEqualTo(0f);
+        assertThat(g.getPoints(true)).isEqualTo(0f);
+        assertThat(Piece.isQueen(cb.getPieceAt("h4"))).isEqualTo(true);
+        assertThat(Piece.isPawn(cb.getPieceAt("h2"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("h2").isMoved()).isEqualTo(false);
+        assertThat(cb.getPieceAt("h2").isWhiteTeam()).isEqualTo(true);
+        assertThat(cb.getPieceAt("h4").isMoved()).isEqualTo(true);
+        // Knight moves back
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(g.tempGameOver()).isEqualTo(false);
+        assertThat(Piece.isKnight(cb.getPieceAt("e2"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("e2").isMoved()).isEqualTo(true);
+        assertThat(cb.getPieceAt("g3").isPiece()).isEqualTo(false);
+        // Queen moves back
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(Piece.isQueen(cb.getPieceAt("d8"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("d8").isMoved()).isEqualTo(false);
+        assertThat(cb.getPieceAt("h4").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("c4");
+        // C-pawn moves back
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("c2"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("c2").isMoved()).isEqualTo(false);
+        assertThat(cb.getPieceAt("c4").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        // black knight moves back
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(Piece.isKnight(cb.getPieceAt("f6"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("f6").isMoved()).isEqualTo(true);
+        // uncastles
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(Piece.isKing(cb.getPieceAt("e1"))).isEqualTo(true);
+        assertThat(Piece.isRook(cb.getPieceAt("h1"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("e1").isMoved()).isEqualTo(false);
+        assertThat(cb.getPieceAt("h1").isMoved()).isEqualTo(false);
+        // bishop goes back
+        g.reverseMove();
+        d.draw(2000);
+        // white knight goes back
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(Piece.isKnight(cb.getPieceAt("g1"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("g1").isMoved()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("e5");
+        // e5 pawn moves back
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("e7"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("e7").isMoved()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        // w bishop moves back
+        g.reverseMove();
+        d.draw(2000);
+        // black knight moves back
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(Piece.isKnight(cb.getPieceAt("g8"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("g8").isMoved()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        // white pawn un-enpassants
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(Piece.isPawn(cb.getPieceAt("d5"))).isEqualTo(true);
+        assertThat(Piece.isPawn(cb.getPieceAt("c5"))).isEqualTo(true);
+        assertThat(cb.getPieceAt("c6").isPiece()).isEqualTo(false);
+        assertThat(cb.getEnPassant()).isEqualTo("c5");
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(cb.getEnPassant()).isEqualTo("d5");
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(cb.getEnPassant()).isEqualTo("e4");
+        g.reverseMove();
+        d.draw(2000);
+        assertThat(cb.getEnPassant()).isEqualTo("");
+        // Back at start.
+        g.move("e2 -> e4");
+        d.draw(2000);
+    }
+
+
+    @Test
     public void tempMoveTest(){
 
         ChessBoard cbb = new ChessBoard();

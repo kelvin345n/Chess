@@ -1,6 +1,7 @@
 package board;
 
 import bots.Bot;
+import bots.RandomBot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +18,13 @@ public class GameBotVsBot {
         boolean oneBotIsWhite;
         Random rand = new Random();
         if (rand.nextInt(2) == 1){
+            System.out.println("One bot is white");
             oneBotIsWhite = true;
         } else {
+            System.out.println("One bot is black");
             oneBotIsWhite = false;
         }
+        Bot lastBot = new RandomBot();
         while(!g.isGameOver()){
             drawer.draw();
             String color = "Black";
@@ -31,8 +35,10 @@ public class GameBotVsBot {
             String move;
             if (gl.isWhiteTurn() == oneBotIsWhite){
                 move = oneBot.nextMove(g);
+                lastBot = oneBot;
             } else {
                 move = twoBot.nextMove(g);
+                lastBot = twoBot;
             }
             g.move(move);
             count++;
@@ -40,7 +46,9 @@ public class GameBotVsBot {
         }
         drawer.draw();
         scanner.close();  // Close the scanner
-        System.out.println("Game Over! " + count + " moves made" );
+        System.out.println("Game Over! " + lastBot.name() + " wins." + count + " moves made" );
+
+
     }
     public GameBotVsBot(Bot oneBot, Bot twoBot){
         this(new ChessBoard(), new ArrayList<>(), true, oneBot, twoBot);

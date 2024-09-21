@@ -17,9 +17,6 @@ public class Game {
     float whitePoints;
     float blackPoints;
 
-    float orgWhite;
-    float orgBlakc;
-
     public Game(ChessBoard cb, List<String> moves){
         whitePoints = 0f;
         blackPoints = 0f;
@@ -154,24 +151,18 @@ public class Game {
 
     /** Given a move, the game temporarily changed the chessboard, moveslist,
      * and game state. The game does not change back unless 'reverseMove' is called.
-     * If it is called twice in a row, then undefined behaviors happen. Must be a valid move.
-     * if not bad things happen. */
+     * Can be called multiple times in a row.  */
     public void tempMove(String move){
         gamelogic.tempMove(move);
     }
 
-    /** The move called from temp move is reversed, and the original game state before
-     * it was called is fully restored. If tempMove was not called before then this will
-     * cause undefined behavior.
-     *
-     * This includes move list,
-     * The chessboard,
+    /** The last temp move is reversed.
      *
      * */
     public void reverseMove(){
         gamelogic.reverseMove();
-        whitePoints = orgWhite;
-        blackPoints = orgBlakc;
+        whitePoints = 0f;
+        blackPoints = 0f;
     }
 
 

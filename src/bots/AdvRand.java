@@ -37,4 +37,8 @@ public class AdvRand implements Bot{
         }
         return moves.get(rand.nextInt(moves.size()));
     }
+    @Override
+    public String name() {
+        return "AdvRandy";
+    }
 }

@@ -28,4 +28,9 @@ public class RandomBot implements Bot {
         List<String> moves = logic.allPossibleMoves(logic.isWhiteTurn());
         return moves.get(rand.nextInt(moves.size()));
     }
+
+    @Override
+    public String name() {
+        return "Randy";
+    }
 }

@@ -63,6 +63,19 @@ public class Matrix {
         }
     }
 
+    /** Initializes a matrix with numbers using the He initialization method.*/
+    public void heInitialization(int inputsUnits){
+        Random random = new Random();
+        double stdDev = Math.sqrt(2.0 / inputsUnits);
+        for (int r = 1; r <= rows; r++) {
+            for (int c = 1; c <= cols; c++) {
+                double weight = stdDev * random.nextGaussian();
+                setElement(r, c, (float)weight);
+            }
+        }
+    }
+
+
     /** Sets VALUE at the specified row and column in the matrix */
     public void setElement(int row, int col, float value){
         m[getIndex(row, col)] = value;

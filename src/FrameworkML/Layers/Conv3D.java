@@ -153,7 +153,7 @@ public class Conv3D implements Layer{
             // Each of the weights will correspond to a matrix that is
             // the filter size x number of filters needed.
             weights[i] = new Matrix(rowFilterSize, colFilterSize * filterCount);
-            weights[i].randomizeMatrix(-0.5f, 0.5f);
+            weights[i].heInitialization(rowFilterSize*colFilterSize*depthFilterSize);
             weightGrad[i] = new Matrix(rowFilterSize, colFilterSize * filterCount);
             runningWeightGrad[i] = new Matrix(rowFilterSize, colFilterSize * filterCount);
         }
