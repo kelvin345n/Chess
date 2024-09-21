@@ -1,0 +1,23 @@
+1. first time, the neural network just learned to classify every position as a draw
+   as when we used a truly random bot, most games ended in draws.
+   Also decided to beef up the architecture to learn more nuances.
+   Bottom line: Aaron is a bitch.
+
+2. Second time, neural network had bad weight intialization. I am idiot. Created more negative
+   values than positives, so when fed into a large dense layer all activations became 0 as the
+   negative weights will dominate. Wasted nearly 3 hours training on a network where one layer
+   just output all 0's so every inference was the same value. Trained on nearly 900 games for naught.
+   Bottom line: Abby is a bitch.
+
+3. Third time, implemented He initialization since most layers use Relu. Crossing fingers.
+    - Alulu: trained on random games, except if checkmate can be made with next move.
+             Trained with 500 games.
+    - Bart: trained on 200 games w/ depth of 2 alphabeta pruning search. Still sucks
+
+4. Fourth time is the charm. Previously did not implement eps-greedy algorithm correctly (engine did
+    not explore correctly). Did not have an experience buffer, so when training on newly played games,
+    the positions were highly correlated. I am going to expand the neural network to have more dense layers
+    and larger dense layers. Felt like the previous architecture was too small. Now going to temporal
+    difference learning between positions. Also taking out alpha beta pruning.
+
+
