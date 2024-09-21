@@ -114,23 +114,20 @@ public class Launcher {
 //            Operations.printMatrix(m);
 //        }
 
-
         String name = "fourthInit";
-        for (int i = 0; i < 40; i++){
-            NeuralNet2 engine = NeuralNetReader.loadNetwork(name);
-            int epoch = 1;
-            for (int j = 0; j < epoch; j++){
-                System.out.println(i +". Epoch " + j);
-                int numOfGames = 5;
-                // We use an epoch of 'games' games, we update parameters 'epoch' times in 'engine'
-                TrainGames.sim(numOfGames, engine, 0.001f);
+        NeuralNet2 engine = NeuralNetReader.loadNetwork(name);
+        System.out.println("Done loading...");
+        int superepoch = 100;
+        TrainEpsGreedy trainer = new TrainEpsGreedy(engine, 0.01f, 1f, 0.05f);
+        for (int i = 0; i < superepoch; i++){
+            int numOfGames = 100;
+            for (int j = 0; j < numOfGames; j++){
+                trainer.sim();
             }
-            name = name + "u";
-            // We save the engine
-            engine.saveNetwork(name);
+            trainer.setEpsilon(trainer.getEpsilon() - 0.01f);
         }
-
-
+        // We save the engine
+        engine.saveNetwork("Samantha");
 
 //        NeuralNet2 load = NeuralNetReader.loadNetwork("Aluluuuuuuuuuuu");
 //        load.saveNetwork("Alulu");

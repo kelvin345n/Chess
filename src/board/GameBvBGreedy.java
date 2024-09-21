@@ -3,68 +3,61 @@ package board;
 import FrameworkML.Matrix;
 import bots.Bot;
 import bots.EpsGreedy;
+import engineStuff.GameDataset;
 import engineStuff.PositionEncoder;
 
 import java.util.*;
 
 public class GameBvBGreedy {
-    private List<Matrix[]> positions;
-    // The first position in positions, and the first value in tempDiffValue
-    // correspond.
-    private List<Float> tempDiffValue;
     private Game g;
     private boolean randomMove;
+    // Stores the position and the temporal difference value of that position.
+    private List<GameDataset> data;
 
-    public GameBvBGreedy(ChessBoard b, List<String> moves, EpsGreedy oneBot, EpsGreedy twoBot){
-        whitePositions = new ArrayList<>();
-        blackPositions = new ArrayList<>();
+    public GameBvBGreedy(ChessBoard b, List<String> moves, EpsGreedy bot, float stepSize){
+        data = new ArrayList<>();
         g = new Game(b, moves);
         Gamelogic gl = g.getGamelogic();
-        Random rand = new Random();
-        // Chooses randomly if the oneBot should be white if true.
-        boolean oneBotIsWhite = rand.nextBoolean();
         while(!g.isGameOver()){
-            String move;
-            if (gl.isWhiteTurn() == oneBotIsWhite){
-                move = oneBot.nextMove(g);
-                randomMove = oneBot.isRandomMove();
-            } else {
-                move = twoBot.nextMove(g);
-                randomMove = twoBot.isRandomMove();
-            }
+            String move = bot.nextMove(g);
+            randomMove = bot.isRandomMove();
             if (!randomMove){
-                if (gl.isWhiteTurn()){
-                    whitePositions.add(PositionEncoder.encode(g));
-                } else {
-                    blackPositions.add(PositionEncoder.encode(g));
-                }
+                // Means greedy move was taken.
+                dataAdder(bot, stepSize);
             }
             g.move(move);
         }
+        // Game is over.
+        // The position with the ending position is not temporally different
+        // and just the reward. Greedy value is the value of the current position
+        // once the game has ended.
+        float reward = g.getPoints(!gl.isWhiteTurn());
+        float update = bot.getGreedyValue() + stepSize*(reward - bot.getGreedyValue());
+        // This is the value we want the current position to get closer to.
+        Matrix[] val = new Matrix[]{new Matrix(1, 1, new float[]{
+                update
+        })};
+        GameDataset gd = new GameDataset(PositionEncoder.encode(g), val);
+        data.add(gd);
+    }
+    public GameBvBGreedy(EpsGreedy bot, float stepSize){
+        this(new ChessBoard(), new ArrayList<>(), bot, stepSize);
     }
 
-    public List<Matrix[]> getWhitePositions(){
-        return whitePositions;
+    /** Adds position to list and its update value to list if greedy move was made. */
+    private void dataAdder(EpsGreedy bot, float stepSize){
+        // We get the value of the new position and have to subtract greedy value
+        // by 1 because that greedy value is the value for the other player.
+        float update = bot.getCurrValue() + stepSize*((1 - bot.getGreedyValue()) - bot.getCurrValue());
+        // This is the value we want the current position to get closer to.
+        Matrix[] val = new Matrix[]{new Matrix(1, 1, new float[]{
+                update
+        })};
+        GameDataset gd = new GameDataset(PositionEncoder.encode(g), val);
+        data.add(gd);
     }
-    public List<Matrix[]> getBlackPositions(){
-        return blackPositions;
-    }
-    public Matrix[] getWhiteOutcome() {
-        return outcomeHelper(true);
-    }
-    public Matrix[] getBlackOutcome(){
-        return outcomeHelper(false);
-    }
-    private Matrix[] outcomeHelper(boolean isWhite){
-        float[] outcomes = new float[3]; // Array to store win, draw, lose
-        float points = g.getPoints(isWhite);
-        if (points == 1f) {
-            outcomes[0] = 1f; // Win
-        } else if (points == 0.5f) {
-            outcomes[1] = 1f; // Draw
-        } else {
-            outcomes[2] = 1f; // Lose
-        }
-        return new Matrix[]{new Matrix(1, 3, outcomes)};
+
+    public List<GameDataset> getData(){
+        return data;
     }
 }

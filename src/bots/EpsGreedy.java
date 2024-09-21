@@ -17,6 +17,12 @@ public class EpsGreedy implements Bot{
     // If random move was last made then set to true. If greedy
     // move was made then set to false.
     private boolean randomMove;
+    // value of the position after the greedy move was made.
+    private float greedyValue;
+    // Value of the current position.
+    private float currValue;
+
+
     /** This bot uses the epsilon-greedy method in choosing moves.
      * The epsilon value is */
     public EpsGreedy(NeuralNet2 chessEngine, float epsilon){
@@ -46,6 +52,9 @@ public class EpsGreedy implements Bot{
         }
         // For greedy move choice, we choose the move that when in
         // the next position has the lowest value for the next player.
+        Matrix[] currPosEnc = PositionEncoder.encode(game);
+        currValue = nn.inference(currPosEnc)[0].getElement(1, 1);
+
         float value = Float.POSITIVE_INFINITY;
         String bestMove = "";
         for (String move: moves){
@@ -59,11 +68,18 @@ public class EpsGreedy implements Bot{
             }
             game.reverseMove();
         }
+        greedyValue = value;
         return bestMove;
     }
 
     public boolean isRandomMove(){
         return randomMove;
+    }
+    public float getGreedyValue(){
+        return greedyValue;
+    }
+    public float getCurrValue(){
+        return currValue;
     }
 
     @Override
